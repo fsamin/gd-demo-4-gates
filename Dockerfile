@@ -6,8 +6,8 @@ COPY go.mod ./
 COPY *.go ./
 RUN CGO_ENABLED=0 go build -o /app .
 
-# scratch carries no OS packages, so the image gate has nothing to report.
-FROM scratch
+# A real base image, so the running container has a shell to debug with.
+FROM debian:11-slim
 COPY --from=build /app /app
 EXPOSE 8080
 ENTRYPOINT ["/app"]
