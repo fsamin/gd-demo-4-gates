@@ -53,8 +53,8 @@ func main() {
 		printf(w, "  vulncheck  govulncheck ./...    reachable vulnerabilities in the deps\n")
 		printf(w, "  imageScan  trivy image          HIGH and CRITICAL CVEs in the image\n")
 		printf(w, "\nA commit failing a blocking gate is never released: this page keeps\n")
-		printf(w, "serving the previous one. Each branch of this repository breaks exactly\n")
-		printf(w, "one gate — see the README.\n")
+		printf(w, "serving the previous one. Each branch of this repository trips a gate on\n")
+		printf(w, "purpose — see the README for which one.\n")
 
 		log.Printf("%s %s from %s (%s)", r.Method, r.URL.Path, r.RemoteAddr, time.Since(start).Round(time.Millisecond))
 	})
