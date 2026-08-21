@@ -48,16 +48,34 @@ Then revert, and the same pipeline releases the good commit again.
 
 ## One branch per gate
 
-| Branch | What it breaks | The gate that catches it |
-|---|---|---|
-| `main` | nothing — all four green | — |
-| `failing-test` | the discount boundary: `<` becomes `<=`, so an order landing exactly on the threshold loses its discount | `test` |
-| `lint-error` | leaves a dead function behind after a refactor | `quality` |
-| `vuln-dep` | pulls a YAML parser with a known, *reachable* vulnerability | `vulncheck` |
-| `image-cve` | ships the binary on a long-unpatched base image instead of `scratch` | `imageScan` |
+| Branch | What it breaks | test | quality | vulncheck | imageScan |
+|---|---|:--:|:--:|:--:|:--:|
+| `main` | nothing | ✓ | ✓ | ✓ | ✓ |
+| `failing-test` | the discount boundary: `<` becomes `<=`, so an order landing exactly on the threshold loses its discount | ✗ | ✓ | ✓ | ✓ |
+| `lint-error` | leaves a dead function behind after extracting a helper | ✓ | ✗ | ✓ | ✓ |
+| `vuln-dep` | parses the sample basket with `gopkg.in/yaml.v2@v2.2.2` | ✓ | ✓ | ✗ | ✗ |
+| `image-cve` | ships the binary on `debian:11-slim` instead of `scratch` | ✓ | ✓ | ✓ | ✗ |
 
-Each one fails exactly one gate and passes the other three, so a demo can pick
-the gate it wants to show.
+`vuln-dep` deliberately trips **two** gates, and the two reports are worth
+reading side by side: `govulncheck` finds three vulnerabilities and names the
+call that reaches them (`gd.loadBasket calls yaml.Unmarshal`), while `trivy`
+finds one and names the module version sitting in the image. Same dependency,
+two angles — a reachability analysis and an inventory — which is why both gates
+exist.
+
+Every other branch fails exactly one gate, so a demo can pick the one it wants
+to show.
+
+## Why the builder image is `golang:1.26-alpine`
+
+Because `imageScan` scans the **binary** as well as the OS packages, and a Go
+binary carries its toolchain's standard library. Built with `golang:1.24`, this
+application failed the image gate with 19 HIGH CVEs in `crypto/x509`, `net/http`
+and friends — from a `FROM scratch` image with no OS package at all. The
+vulnerabilities were real; they were just not this repository's code.
+
+The floating minor tag is deliberate: it tracks the latest patch release, so the
+gate stays green as fixes ship instead of going red the week a CVE is published.
 
 ## Locally
 
