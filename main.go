@@ -12,16 +12,35 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"gopkg.in/yaml.v2"
 )
 
 const version = "v1"
 
-// basket is the sample order shown on the page. It is worth exactly the
+// basketYAML is the sample order shown on the page. It is worth exactly the
 // discount threshold, so it sits on the boundary the tests pin — the one a
-// regression is most likely to move.
-var basket = []Item{
-	{Label: "widget", Cents: 4_000, Qty: 2},
-	{Label: "gadget", Cents: 2_000, Qty: 1},
+// regression is most likely to move. Keeping it as data means changing the
+// sample takes no code change.
+const basketYAML = `
+- label: widget
+  cents: 4000
+  qty: 2
+- label: gadget
+  cents: 2000
+  qty: 1
+`
+
+var basket = loadBasket(basketYAML)
+
+// loadBasket parses the sample order. A malformed sample is a programming
+// error, not a runtime condition, so it stops the process.
+func loadBasket(raw string) []Item {
+	var items []Item
+	if err := yaml.Unmarshal([]byte(raw), &items); err != nil {
+		log.Fatalf("parsing the sample basket: %v", err)
+	}
+	return items
 }
 
 func main() {
