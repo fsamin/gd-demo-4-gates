@@ -32,5 +32,20 @@ func Total(items []Item) int {
 	if subtotal < discountThresholdCents {
 		return subtotal
 	}
+	return applyDiscount(subtotal)
+}
+
+// applyDiscount takes the volume discount off an order value.
+func applyDiscount(cents int) int {
+	return cents - cents*discountPercent/100
+}
+
+// discountedTotal is the implementation applyDiscount replaces, kept around
+// until the last caller has moved over.
+func discountedTotal(items []Item) int {
+	subtotal := Subtotal(items)
+	if subtotal < discountThresholdCents {
+		return subtotal
+	}
 	return subtotal - subtotal*discountPercent/100
 }
