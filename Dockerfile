@@ -1,4 +1,6 @@
-FROM golang:1.24-alpine AS build
+# A current Go, on the floating minor tag: the image gate scans this binary
+# too, and a stale toolchain's own stdlib CVEs would fail it all by themselves.
+FROM golang:1.26-alpine AS build
 WORKDIR /src
 COPY go.mod ./
 COPY *.go ./
