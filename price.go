@@ -25,11 +25,11 @@ func Subtotal(items []Item) int {
 }
 
 // Total applies the volume discount to the subtotal. The discount is granted on
-// the whole order, not only on the part above the threshold, and an order has to
-// pass the threshold to earn it.
+// the whole order, not only on the part above the threshold, and the threshold
+// itself already earns it.
 func Total(items []Item) int {
 	subtotal := Subtotal(items)
-	if subtotal <= discountThresholdCents {
+	if subtotal < discountThresholdCents {
 		return subtotal
 	}
 	return subtotal - subtotal*discountPercent/100
